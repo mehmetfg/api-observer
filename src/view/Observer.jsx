@@ -1,24 +1,50 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, isValidElement} from "react";
 import firebaseDb  from '../config/firebase'
+import axios from "axios";
 
+const INITIAL =[
+{
+    trade_id:"",
+    price:"1753.97000000",
+    base_volume:"0.00685000",
+    target_volume:"12.01469450",
+    type:"buy",
+    timestamp:"1624723921000"
+}]
 
 
 const  Observer = () => {
 
 
     const [contactObject, setContactObject] = useState({})
+    const  [saleObject, setSaleObject] = useState({})
     const  [currentId, setCurrentId] = useState()
-
     useEffect(() => {
-        firebaseDb.child('contacts').on('value', snapshot => {
+        firebaseDb.child('Sales').on('value', snapshot => {
             if(snapshot.val() != null)
-                setContactObject({
+                setSaleObject({
                     ...snapshot.val()
                 })
+        })
+
+        console.log(saleObject)
+    }, []);
+
+    const fetchItems = async  () => {
+
+
+
+        axios.get('https://goldexco.in/Api/External/historical_trades?ticker_id=ETH_USDT&depth=10000').then(response =>{
+            const resut=response.data.data.buy;
+            setSaleObject({
+                ...resut
+            })
 
         })
 
-    }, []);
+
+
+    }
 
     const onDelete = key => {
 
@@ -36,6 +62,22 @@ const  Observer = () => {
                 }
             )
         }
+    }
+    const addRecord = () => {
+
+
+        Object.keys(saleObject).map(id => {
+
+            firebaseDb.child('Sales').push(
+                saleObject[id],
+                err => {
+                    if(err){
+                        console.log(err)
+                    }
+                }
+            )
+        })
+
     }
     const addOrEdit =  obj => {
         if(currentId=='')
@@ -71,27 +113,27 @@ const  Observer = () => {
 
             <div className="col-md-7">
 
+                <a onClick={addRecord} className="btn btn-primary"> KAydet</a>
                 <table className="table table-border">
                     <thead>
                     <tr>
-                        <th>Full Name</th>
-                        <th>Mobile</th>
-                        <th>Email</th>
-                        <th>Addres</th>
+                        <th>Trade ID</th>
+                        <th>Fiyat</th>
+                        <th>Temel Fiyat</th>
+                        <th>Hedef Fiyat</th>
                         <th>Actions</th>
                         <th></th>
                     </tr>
                     </thead>
                     <tbody>
                     {
-                        Object.keys(contactObject).map(id => {
+                        Object.keys(saleObject).map(id => {
                             return <tr key={id}>
-                                <td>{contactObject[id].fullName}</td>
-                                <td>{contactObject[id].mobil}</td>
-                                <td>{contactObject[id].email}</td>
-                                <td>{contactObject[id].address}</td>
-                                <td><a className="btn text-primary" onClick={() => setCurrentId(id)}> <i className=" fa fa-edit"></i> </a></td>
-                                <td><a className="btn text-danger" onClick={() => onDelete(id)}> <i className="fa fa-trash"></i></a> </td>
+                                <td>{saleObject[id].trade_id}</td>
+                                <td>{saleObject[id].price}</td>
+                                <td>{saleObject[id].base_volume}</td>
+                                <td>{saleObject[id].target_volume}</td>
+
                             </tr>
 
                         })
