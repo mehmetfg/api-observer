@@ -16,16 +16,11 @@ const INITIAL =[
 const  Observer = () => {
 
 
-    const [contactObject, setContactObject] = useState({})
+    const [firebaseObject, setFirebaseObject] = useState({})
     const  [saleObject, setSaleObject] = useState({})
     const  [currentId, setCurrentId] = useState()
     useEffect(() => {
-        firebaseDb.child('Sales').on('value', snapshot => {
-            if(snapshot.val() != null)
-                setSaleObject({
-                    ...snapshot.val()
-                })
-        })
+       fetchItems()
 
         console.log(saleObject)
     }, []);
@@ -34,7 +29,7 @@ const  Observer = () => {
 
 
 
-        axios.get('https://goldexco.in/Api/External/historical_trades?ticker_id=ETH_USDT&depth=10000').then(response =>{
+        axios.get('https://goldexco.in/Api/External/historical_trades?ticker_id=CYCE_USDT&depth=10000').then(response =>{
             const resut=response.data.data.buy;
             setSaleObject({
                 ...resut
@@ -65,10 +60,16 @@ const  Observer = () => {
     }
     const addRecord = () => {
 
+        const newObject=[];
+        firebaseDb.child('Sales').on('value', snapshot => {
+            if(snapshot.val() != null)
+                setFirebaseObject({
+                    ...snapshot.val()
+                })
+        })
 
         Object.keys(saleObject).map(id => {
-
-            firebaseDb.child('Sales').push(
+            firebaseDb.child('goldex').push(
                 saleObject[id],
                 err => {
                     if(err){
@@ -113,7 +114,7 @@ const  Observer = () => {
 
             <div className="col-md-7">
 
-                <a onClick={addRecord} className="btn btn-primary"> KAydet</a>
+                <a onClick={addRecord} className="btn btn-primary"> Kaydet</a>
                 <table className="table table-border">
                     <thead>
                     <tr>
